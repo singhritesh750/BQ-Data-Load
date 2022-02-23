@@ -1,5 +1,4 @@
 
-
 # Python program to illustrate the concept
 # of threading
 # importing the threading module
@@ -15,13 +14,12 @@ import setup_credential
 #ACCOUNTS=['8p8HthXV29qy5NmDtA7y6qzxvECxVGU5XGRsWLku1Ckn']
 
 #Prodution-grade
-ACCOUNTS=['8p8HthXV29qy5NmDtA7y6qzxvECxVGU5XGRsWLku1Ckn','HWFzm33hjwjHQB24np1bbW6oPy1xo8kGVfBe2cQyYM7E','A5x1aLP7ribPDuRNXcMaTAzwnyn3mFqK5Xewen4Zk3q1','3itU5ME8L6FDqtMiRoUiT1F7PwbkTtHBbW51YWD5jtjm']
+#ACCOUNTS=['8p8HthXV29qy5NmDtA7y6qzxvECxVGU5XGRsWLku1Ckn','HWFzm33hjwjHQB24np1bbW6oPy1xo8kGVfBe2cQyYM7E','A5x1aLP7ribPDuRNXcMaTAzwnyn3mFqK5Xewen4Zk3q1','3itU5ME8L6FDqtMiRoUiT1F7PwbkTtHBbW51YWD5jtjm']
 
 #production-grade
-#fhanda = os.popen('acc_to_check.txt')
-#acc_to_check = fhanda.read()
-#ACCOUNTS = (acc_to_check.strip()).split('\n')
-
+fhanda = open('acc_to_check.txt')
+ACCOUNTS = fhanda.readlines()
+fhanda.close()
 
 
 class Geeks():
@@ -70,20 +68,24 @@ class Geeks():
             FHAND1.close()
             FHAND2 = open('list_of_sig'+ str(ind) +'.txt','w')
             print('check8')
-            for detail_ in output3:
-                FHAND2.write(detail_)
-                print('detail_ variable is :', str(detail_))
-            FHAND2.close()
-            #print('printing the datail of file'+'list_of_sig'+ str(ind) +'.txt')
+            #comdition to check if solana-ledger-tool is outputting something 
+            if len(output3) > 0:
+                for detail_ in output3:
+                    FHAND2.write(detail_)
+                    print('detail_ variable is :', str(detail_))
+                FHAND2.close()
+                #print('printing the datail of file'+'list_of_sig'+ str(ind) +'.txt')
 
-            row = str(account_loop) + "," + str(detail_)
-            fhand = open("last_transac.txt",'a')
-            fhand.write(row)
-            fhand.close()
+                row = str(account_loop) + "," + str(detail_)
+                fhand = open("last_transac.txt",'a')
+                fhand.write(row)
+                fhand.close()
 
-            #print(' last_transac.txt after changes is:')
-            #fhand3a = os.popen('cat last_transac.txt')
-            #fhand3a.close()
+                #print(' last_transac.txt after changes is:')
+                #fhand3a = os.popen('cat last_transac.txt')
+                #fhand3a.close()
+            else:
+                print('this account has nothing in the signatures')
         else:
             print('The Account is Already existing in the last_transaction.txt file')
             fhand5 = open("last_transac.txt")
@@ -163,7 +165,7 @@ class Geeks():
         print('time.sleep(5)')
         fhandle3.close()
 
-    #removing the old uploaded file from GCS    
+    #removing the old uploaded file from GCS
     def remove_old_CSfile(file_name):
         fhand5 = os.popen('gsutil rm gs://testing_eu_location/'+ str(file_name) + '')
         #fhand5 = os.popen('gsutil rm gs://testing_eu_location/sig_details.json')
@@ -187,97 +189,136 @@ rem_upload_dict = {}
 rem_upload_dict1 = {}
 
 for index_of_account in range(len(ACCOUNTS)):
+    print('check1')
 
     if (3*int(len(ACCOUNTS)/3))-1 < index_of_account and index_of_account <= (len(ACCOUNTS)-1 ):
+        print('check2')
         remaining_loop = (len(ACCOUNTS)-1 ) - ((3*int(len(ACCOUNTS)/3))-1)
         print('remaining loops count is : ',remaining_loop)
 
         if remaining_loop == 0 or remaining_loop >= 0 :
+            print('check3')
             if remaining_loop == 0:
+                print('check4')
                 remaining_loop = 1
                 print('remaining_loop is after changing is , ',remaining_loop)
 
 
     #starting the function to start generating the sig.details.json file
         for loops1 in range(remaining_loop):
+            print('check5')
             rem_variable_dict['t'+str(loops1)] = threading.Thread(target=Geeks.account_through_loop, args=(ACCOUNTS[loops1],loops1,))
+            print('rem_variable dict is ', rem_variable_dict)
             print('t+str(loops1%2) is : '+'t'+str(loops1))
             print('\n\nloopnumber in remaining run: ',loops1)
             count=10
             print('the value for the count is : ',count)
         for key1,value1 in rem_variable_dict.items():
+            print('check6')
             print('thread is : ', key1)
             value1.start()
         for key1,value1 in rem_variable_dict.items():
+            print('check7')
             value1.join()
 
     #starting the next function for uploading the generated sig.details.json file to GCS
         for loops2 in range(remaining_loop):
+            print('check8')
             rem_upload_dict['t'+str(loops2)] = (threading.Thread(target=Geeks.upload_sig_file_toCS, args=('sig_details'+str(loops2)+'.json',)))
+            print('rem_upload dict is ', rem_upload_dict)
         for key2,value2 in rem_upload_dict.items():
+            print('check9')
             print('thread is : ', key2)
             value2.start()
         for key2,value2 in variable_dict.items():
+            print('check10')
             value2.join()
 
 
     #starting the next function for deleting the uploaded sig.details.json file from GCS
         for loops3 in range(remaining_loop):
+            print('check11')
             rem_upload_dict1['t'+str(loops3)] = threading.Thread(target=Geeks.remove_old_CSfile, args=('sig_details'+str(loops3)+'.json',))
+            print('rem_upload dict1 is ', rem_upload_dict1)
         for key2,value2 in rem_upload_dict1.items():
+            print('check12')
             print('thread is : ', key2)
             value2.start()
         for key2,value2 in rem_upload_dict1.items():
+            print('check13')
             value2.join()
 
     #for starting the command execution for the first element in the index_of_accounts
     elif (count == 0):
+        print('check14')
         variable_dict['t'+str(index_of_account)] = threading.Thread(target=Geeks.account_through_loop, args=(ACCOUNTS[index_of_account],index_of_account,))
+        print('variable dict is ', variable_dict)
         print('t+str(index_of_account%2) is : '+'t'+str(index_of_account))
         print('\n\nindex_of_account in first run: ',index_of_account)
         count=1
 
     else:
+        print('check15')
         try:
+            print('check16')
             index_is = index_of_account%3
             print('\n\nindex_is variable is : ',index_is)
             variable_dict['t'+str(index_is)] = threading.Thread(target=Geeks.account_through_loop, args=(ACCOUNTS[index_of_account],index_is,))
+            print('variable dict is ', variable_dict)
             print('\n\nindex_of_account is : ',index_of_account)
     #        for key in variable_dict.items():
     #            key.start()
             count=2
             print('the value for the count is : ',count)
             if index_of_account %2 ==0 or index_of_account == (len(ACCOUNTS)-1):
+                print('check17')
                 for key,value in variable_dict.items():
+                    print('check18')
                     print('thread is : ', key)
+                    print('key, value for start() for this iteration is : ' + str(key) +',' + str(value))
                     value.start()
                 for key,value in variable_dict.items():
+                    print('check19')
+                    print('key, value for join() for this iteration is : ' + str(key) +',' + str(value))
                     value.join()
             count=3
             print('the value for the count is : ',count)
             for i in range(0,3):
+                print('check20')
                 if (count ==3):
+                    print('check21')
                     upload_dict['t'+str(i)] = (threading.Thread(target=Geeks.upload_sig_file_toCS, args=('sig_details'+str(i)+'.json',)))
+                    print('upload dict is ', upload_dict)
                     count = 4
                     print('the value for the count is : ',count)
-                    pass
+                    #pass
                 else:
+                    print('check22')
                     try:
+                        print('check23')
                         upload_dict['t'+str(i)] = (threading.Thread(target=Geeks.upload_sig_file_toCS, args=('sig_details'+str(i)+'.json',)))
+                        print('upload dict is ', upload_dict)
     #                    for key1 in upload_dict.items():
     #                        key1.start()
                         count=5
                         print('the value for the count is : ',count)
                         if i%2 == 0 or index_of_account == (len(ACCOUNTS)-1):
+                            print('check24')
                             for key1,value1 in upload_dict.items():
+                                print('check25')
+                                print('key1, value1 for start() for this iteration is : ' + str(key1) +',' + str(value1))
                                 value1.start()
                             for key,value in upload_dict.items():
+                                print('check26')
+                                print('key1, value1 for join() for this iteration is : ' + str(key1) +',' + str(value1))
                                 value.join()
                         count=6
                         print('the value for the count is : ',count)
                         for y in range(3):
+                            print('check27')
                             print('inside for loop')
                             if (count ==6):
+                                print('check28')
                                 print('inside if ')
                                 print('upload_dict is :',upload_dict)
                                 upload_dict1['t'+str(y)] = threading.Thread(target=Geeks.remove_old_CSfile, args=('sig_details'+str(y)+'.json',))
@@ -285,25 +326,36 @@ for index_of_account in range(len(ACCOUNTS)):
                                 count = 7
                                 print('the value for the count is : ',count)
                             else:
+                                print('check29')
                                 try:
+                                    print('check30')
                                     upload_dict1['t'+str(y)] = threading.Thread(target=Geeks.remove_old_CSfile, args=('sig_details'+str(y)+'.json',))
+                                    print('upload dict1 is ', upload_dict1)
     #                                for key2 in upload_dict.items():
     #                                    key2.start()
                                     count=8
                                     print('the value for the count is : ',count)
                                     if y%2 == 0 or index_of_account == (len(ACCOUNTS)-1):
+                                        print('check31')
                                         for key2,value2 in upload_dict1.items():
+                                            print('check32')
+                                            print('key, value for start() for this iteration is : ' + str(key2) +',' + str(value2))
                                             value2.start()
                                         for key2,value2 in upload_dict1.items():
-                                            value.join()
+                                            print('check33')
+                                            print('key2, value2 for join() for this iteration is : ' + str(key2) +',' + str(value2))
+                                            value2.join()
                                         count=9
                                         print('the value for the count is : ',count)
                                 except:
+                                    print('check34')
                                     print('not running the loop3 anymore at index :',index_of_account)
                     except:
+                        print('check35')
                         print('not running the loop2 anymore at index :',index_of_account)
         except:
-            print('not running the loop1 anymore at index :',index_of_account) 
+            print('check36')
+            print('not running the loop1 anymore at index :',index_of_account)
 
 '''
     count+=1
@@ -413,7 +465,7 @@ for index_of_account in range(len(ACCOUNTS)):
     print('finishing the third thread 2')
     t3.join()
     print('finishing the third thread 3')
-    
+
 #    t2.join()
 #    print('finishing the first thread 2')
 #    t2 = threading.Thread(target=Geeks.upload_sig_file_toCS, args=(file_name,1,))
@@ -436,5 +488,3 @@ print("the accounts in list are over")
 print("Done!")
 
 '''
-
-
